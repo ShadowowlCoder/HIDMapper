@@ -1,0 +1,49 @@
+VID=VID_22BA
+
+Raporty z kierownicy informuj¹ o wciœniêtych przyciskach
+oraz wychyleniach kierownicy i peda³ów. Wszystkie informacje
+otrzymuje siê w raporcie 00
+
+bajt 0 - wychylenie kierownicy
+  00 - maksymalnie w lewo
+  7F - po³o¿enie centralne
+  FF - maksymalnie w prawo
+  
+bajt 1 - peda³ gazu i hamulca
+  00 - gaz do dechy
+  7F - ani gazu ani hamulca - neutralne
+  FF - hamulec do dechy
+  
+  Naciœniêcie obydwu na raz powoduje powrót
+  do po³o¿enia neutralnego, czyli nie mo¿na
+  jednoczeœnie pi³owaæ silnika i hamowaæ samochodu.
+  
+bajty 2 i 3 zwracaj¹ 80
+
+bajt 4, bity:
+  87654321
+  |||||||\- pierwszy bit numeru kierunku  [kierunek 1 to góra potem zgodnie z ruchem]
+  ||||||\-- drugi bit numeru kierunku     [wskazówek zegara, co 45 stopni           ]
+  |||||\--- trzeci bit numeru kierunku
+  ||||\---- czwarty bit numeru kierunku
+  |||\----- stan przycisku 1
+  ||\------ stan przycisku 2
+  |\------- stan przycisku 3
+  \-------- stan przycisku 4
+
+bajt 5, bity:
+  87654321
+  |||||||\- stan przycisku 5 A
+  ||||||\-- stan przycisku 6 B
+  |||||\--- stan przycisku 7 X
+  ||||\---- stan przycisku 8 Y
+  |||\----- stan przycisku 9 Ry
+  ||\------ stan przycisku 10 Ly
+  |\------- stan przycisku 11 Select/Back
+  \-------- stan przycisku 12 Start
+
+Do kierownicy mo¿na wys³aæ raport 00
+  Ustawienie wartoœci innej ni¿ 00 na bajtach 2 lub 3
+  powoduje w³¹czenie z odpowiedni¹ si³¹ wibracji.
+  Na bajtach 0 i 1 powinno byæ zawsze 0.
+  Ustawienie 0 na bajtach 2 lub 3 wy³¹cza wibracje.
