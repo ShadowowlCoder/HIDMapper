@@ -112,28 +112,28 @@ object HIDM: THIDM
       object lbIni: TLabel
         Left = 3
         Top = 8
-        Width = 47
+        Width = 50
         Height = 13
-        Caption = '&Script list:'
+        Caption = '&Profile list:'
         FocusControl = IniScList
       end
       object IniScList: TListBox
-        Left = 0
+        Left = -2
         Top = 27
         Width = 368
         Height = 222
-        Hint = 'Mappings list'
+        Hint = 'Profiles list'
         Anchors = [akLeft, akTop, akRight, akBottom]
         ItemHeight = 13
         TabOrder = 5
         OnClick = IniScListClick
       end
-      object bbtAddScript: TBitBtn
+      object bbtAddProfile: TBitBtn
         Left = 78
         Top = 2
         Width = 25
         Height = 25
-        Hint = 'Adds new Script for Device'
+        Hint = 'Adds new Profile for Device'
         Caption = '+'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -142,14 +142,14 @@ object HIDM: THIDM
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 0
-        OnClick = bbtAddScriptClick
+        OnClick = bbtAddProfileClick
       end
-      object bbtEditScript: TBitBtn
-        Left = 128
+      object bbtEditProfile: TBitBtn
+        Left = 127
         Top = 2
         Width = 25
         Height = 25
-        Hint = 'Edits Script Keys'
+        Hint = 'Edits Profile Keys'
         Caption = 'E'
         Enabled = False
         Font.Charset = DEFAULT_CHARSET
@@ -159,14 +159,14 @@ object HIDM: THIDM
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 2
-        OnClick = bbtEditScriptClick
+        OnClick = bbtEditProfileClick
       end
-      object bbtActivateScript: TBitBtn
+      object bbtActivateProfile: TBitBtn
         Left = 153
         Top = 2
         Width = 25
         Height = 25
-        Hint = 'Activates Script'
+        Hint = 'Activates Profile'
         Caption = 'A'
         Enabled = False
         Font.Charset = DEFAULT_CHARSET
@@ -176,14 +176,14 @@ object HIDM: THIDM
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 3
-        OnClick = bbtActivateScriptClick
+        OnClick = bbtActivateProfileClick
       end
-      object bbtRemoveScript: TBitBtn
+      object bbtRemoveProfile: TBitBtn
         Left = 103
         Top = 2
         Width = 25
         Height = 25
-        Hint = 'Removes Script'
+        Hint = 'Removes Profile'
         Enabled = False
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -194,7 +194,7 @@ object HIDM: THIDM
         ParentShowHint = False
         ShowHint = True
         TabOrder = 1
-        OnClick = bbtRemoveScriptClick
+        OnClick = bbtRemoveProfileClick
         Glyph.Data = {
           DE010000424DDE01000000000000760000002800000024000000120000000100
           0400000000006801000000000000000000001000000000000000000000000000
@@ -214,12 +214,12 @@ object HIDM: THIDM
           0000}
         NumGlyphs = 2
       end
-      object bbtDeactivate: TBitBtn
+      object bbtDeactivateProfile: TBitBtn
         Left = 178
         Top = 2
         Width = 25
         Height = 25
-        Hint = 'Deactivates current Script'
+        Hint = 'Deactivates current Profile'
         Caption = 'D'
         Enabled = False
         Font.Charset = DEFAULT_CHARSET
@@ -229,7 +229,7 @@ object HIDM: THIDM
         Font.Style = [fsBold]
         ParentFont = False
         TabOrder = 4
-        OnClick = bbtDeactivateClick
+        OnClick = bbtDeactivateProfileClick
       end
     end
   end
@@ -248,9 +248,9 @@ object HIDM: THIDM
     object lbActiveScripts: TLabel
       Left = 3
       Top = 3
-      Width = 68
+      Width = 77
       Height = 13
-      Caption = 'Active scripts:'
+      Caption = 'Active Profiless:'
     end
     object ActiveScriptsList: TListBox
       Left = 0
@@ -266,5 +266,50 @@ object HIDM: THIDM
     OnEnumerate = HidCtlEnumerate
     OnDeviceChange = HidCtlDeviceChange
     Left = 88
+  end
+  object TrayIcon: TTrayIcon
+    Hint = 'HID Mapper'
+    Icon.Data = {
+      0000010001002020100001000400E80200001600000028000000200000004000
+      0000010004000000000080020000000000000000000010000000000000000000
+      000000008000008000000080800080000000800080008080000080808000C0C0
+      C0000000FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF000000
+      0000000000000000000000000000088000000880880000880880000000000800
+      0000080080000080080000000000080000000800800000800800000000000800
+      0000080080088880080088880000080000000800800000000800000080000800
+      0000080080000000080000000800080008880800800000800800000800000800
+      0800880080000080080000080000080080000800000800800800000800000800
+      0000000000008800080088880000080000000000000000000800000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000080000000000000000000000000000000800000000000000
+      0000000008000000000000000000000000000000800000000800000000000000
+      0000000800000000080000000000080000000008000000000008080000008000
+      0000000800000000000800080000000000000000000000000000000008000000
+      0000000000000000000000000008000000000000000000000000000008008000
+      0000800000000000000800080000080000008000000080000008080000000000
+      0000080000008000000000000000000000000080000000000000000000000000
+      0000000000008000000000000000000000000000000080000000000000000000
+      000000000000000000000000000000000000000000000000000000000000FFFF
+      FFFF9F93C9FF8F81C0FF8F81C0FF8F80000F8F8000078F8000038881C0E38801
+      C0E38008C0E3830C0803878E1807CFCF3C0FFFFFFFFFFFFFF9FFFFFFF8FFFFF8
+      007FFFF1F8FFFFE3F9FF9FE7FE3F0FE7FE0F0000000300000000000000030F3F
+      FE0F9F1F3E3FFF8F1FFFFFC00FFFFFFF1FFFFFFF3FFFFFFFFFFFFFFFFFFF}
+    PopupMenu = TrayIconMenu
+    Visible = True
+    Left = 120
+  end
+  object TrayIconMenu: TPopupMenu
+    Left = 152
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object OpenMainWindow: TMenuItem
+      Caption = 'Open main window'
+      OnClick = OpenMainWindowClick
+    end
+    object CloseHIDMapper: TMenuItem
+      Caption = 'Close HID Mapper'
+      OnClick = CloseHIDMapperClick
+    end
   end
 end

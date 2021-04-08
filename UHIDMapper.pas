@@ -5,7 +5,8 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, JvHidControllerClass, IniFiles, StdCtrls, ComCtrls,
-  ShellApi, Mask, Buttons, ExtCtrls, UHIDMapping;
+  ShellApi, Mask, Buttons, ExtCtrls, UHIDMapping, UAddProfile, JvComponentBase,
+  Menus;
 
 const
   WM_NOTIFYICON  = WM_USER+345;
@@ -33,37 +34,43 @@ type
     Splitter2: TSplitter;
     lbActiveScripts: TLabel;
     ActiveScriptsList: TListBox;
-    bbtAddScript: TBitBtn;
-    bbtEditScript: TBitBtn;
-    bbtActivateScript: TBitBtn;
-    bbtRemoveScript: TBitBtn;
-    bbtDeactivate: TBitBtn;
+    bbtAddProfile: TBitBtn;
+    bbtEditProfile: TBitBtn;
+    bbtActivateProfile: TBitBtn;
+    bbtRemoveProfile: TBitBtn;
+    bbtDeactivateProfile: TBitBtn;
+    TrayIcon: TTrayIcon;
+    TrayIconMenu: TPopupMenu;
+    OpenMainWindow: TMenuItem;
+    CloseHIDMapper: TMenuItem;
+    N1: TMenuItem;
+    procedure ProfileClick(Sender: TObject);
+    procedure CloseHIDMapperClick(Sender: TObject);
+    procedure OpenMainWindowClick(Sender: TObject);
     procedure HidDeviceData(HidDev: TJvHidDevice;
       ReportID: Byte; const Data: Pointer; Size: Word);
     procedure FormCreate(Sender: TObject);
     procedure HidCtlDeviceChange(Sender: TObject);
     function HidCtlEnumerate(HidDev: TJvHidDevice; const Idx: Integer): Boolean;
     procedure IniScListClick(Sender: TObject);
-    procedure bbtAddScriptClick(Sender: TObject);
-    procedure bbtEditScriptClick(Sender: TObject);
-    procedure bbtActivateScriptClick(Sender: TObject);
-    procedure bbtRemoveScriptClick(Sender: TObject);
+    procedure bbtAddProfileClick(Sender: TObject);
+    procedure bbtEditProfileClick(Sender: TObject);
+    procedure bbtActivateProfileClick(Sender: TObject);
+    procedure bbtRemoveProfileClick(Sender: TObject);
     procedure DevListBoxClick(Sender: TObject);
-    procedure bbtDeactivateClick(Sender: TObject);
+    procedure bbtDeactivateProfileClick(Sender: TObject);
   private
-    a_IniFile: TMemIniFile;
+    a_IniFile: TIniFile;
     CurrentMapping: TMapping;
-    HMainIcon: HICON; // ikona aplikacji w trayu
-    tnid: TNotifyIconData; // dane ikony aplikacji w trayu
+
+    procedure ActivateProfile(AHIDDevice: TJvHidDevice; AProfile: String);
+    procedure DeactivateProfile;
     function DeviceName(HidDev: TJvHidDevice): string;
     function DeviceVendorID(HidDev: TJvHidDevice): string;
     function DeviceProductID(HidDev: TJvHidDevice): string;
-    procedure CMClickIcon(var msg: TMessage); message WM_NOTIFYICON;
-    procedure MinimizeClick(Sender:TObject);
-    procedure RestoreWindow; // przywrócenie okna aplikacji
     procedure DeviceStart(HidDev: TJvHidDevice);
     procedure DeviceStop(HidDev: TJvHidDevice);
-    procedure SetCurrentMapping;
+    procedure SetCurrentMapping(AHIDDevice: TJvHidDevice; AProfile: String);
   end;
 
 var
@@ -76,38 +83,48 @@ implementation
 const
   INI_FILE = 'HIDMapper.ini';
 
-procedure THIDM.bbtActivateScriptClick(Sender: TObject);
+procedure THIDM.ActivateProfile(AHIDDevice: TJvHidDevice; AProfile: String);
 begin
   // stop reader thread
   ActiveScriptsList.Clear;
   if Assigned(CurrentMapping.Device) then
-    DeviceStop(CurrentMapping.Device);
-  if (DevListBox.Items.Count > 0) and (DevListBox.ItemIndex >= 0) then
-  begin
-    SetCurrentMapping;
-    DeviceStart(CurrentMapping.Device);
-    ActiveScriptsList.AddItem(
-      DevListBox.Items[DevListBox.ItemIndex]+' '+
-      IniScList.Items[IniScList.ItemIndex],
-      nil);
-  end;
-  bbtDeactivate.Enabled:=True;
+  DeviceStop(AHIDDevice);
+  SetCurrentMapping(AHIDDevice, AProfile);
+  DeviceStart(AHIDDevice);
+  ActiveScriptsList.AddItem(DeviceName(AHIDDevice) + ' ' + AProfile, nil);
+  bbtDeactivateProfile.Enabled := True;
 end;
 
-procedure THIDM.bbtAddScriptClick(Sender: TObject);
-begin
-  // dodanie nowego skryptu
-end;
-
-procedure THIDM.bbtDeactivateClick(Sender: TObject);
+procedure THIDM.DeactivateProfile;
 begin
   ActiveScriptsList.Clear;
   if Assigned(CurrentMapping.Device) then
     DeviceStop(CurrentMapping.Device);
-  bbtDeactivate.Enabled:=False;
+  bbtDeactivateProfile.Enabled := False;
 end;
 
-procedure THIDM.bbtEditScriptClick(Sender: TObject);
+procedure THIDM.bbtActivateProfileClick(Sender: TObject);
+begin
+  ActivateProfile(TJvHidDevice(DevListBox.Items.Objects[DevListBox.ItemIndex]), IniScList.Items[IniScList.ItemIndex]);
+end;
+
+procedure THIDM.bbtDeactivateProfileClick(Sender: TObject);
+begin
+  DeactivateProfile;
+end;
+
+procedure THIDM.bbtAddProfileClick(Sender: TObject);
+begin
+  // Add new Profile
+  AddProfile.eProfileName.Text := EmptyStr;
+  if AddProfile.ShowModal = mrOK then
+  begin
+    IniScList.Items.Add(AddProfile.eProfileName.Text);
+    a_IniFile.WriteInteger(AddProfile.eProfileName.Text, 'nmaps', 0);
+  end;
+end;
+
+procedure THIDM.bbtEditProfileClick(Sender: TObject);
 var
   s,s1,s2: String;
   i: Integer;
@@ -124,7 +141,7 @@ begin
     HIDMapping.SetGuessDevice(TJvHidDevice(DevListBox.Items.Objects[DevListBox.ItemIndex]))
   else
     HIDMapping.SetGuessDevice(nil);
-  HIDMapping.KeysChanged:=False;
+  HIDMapping.KeysChanged := False;
   HIDMapping.ShowModal;
   if HidMapping.KeysChanged then
   begin
@@ -135,7 +152,7 @@ begin
       s:=IniScList.Items[IniScList.ItemIndex];
       if a_IniFile.SectionExists(s) then
         a_IniFile.EraseSection(s);
-      if a_nmaps>0 then
+      if a_nmaps > 0 then
       begin
         if a_VID<>'' then
           a_IniFile.WriteString(s,'VID',a_VID);
@@ -157,32 +174,29 @@ begin
     end;
     if DevActive and ScriptActive then
     begin
-      SetCurrentMapping;
+      SetCurrentMapping(CurrentMapping.Device, CurrentMapping.Script);
       DeviceStart(CurrentMapping.Device);
     end;
   end;
 end;
 
-procedure THIDM.bbtRemoveScriptClick(Sender: TObject);
+procedure THIDM.bbtRemoveProfileClick(Sender: TObject);
 begin
-  // usuniêcie skryptu
+  // Remove script
   if Application.MessageBox('Are you really want to remove this script?',
-                            'Removing script',MB_YESNO)=IDYES then
+                            'Removing script', MB_YESNO) = IDYES then
   begin
-
+      if a_IniFile.SectionExists(IniScList.Items[IniScList.ItemIndex]) then
+      begin
+        a_IniFile.EraseSection(IniScList.Items[IniScList.ItemIndex]);
+        IniScList.DeleteSelected;
+      end;
   end;
 end;
 
-procedure THIDM.CMClickIcon(var msg: TMessage);
+procedure THIDM.CloseHIDMapperClick(Sender: TObject);
 begin
-  case msg.lparam of
-    WM_LBUTTONUP, WM_LBUTTONDBLCLK :
-    {WM_BUTTONDOWN may cause next Icon to activate if this icon is deleted -
-        (Icons shift left and left neighbor will be under mouse at ButtonUp time)}
-    begin
-      RestoreWindow;
-    end;
-  end;
+  Application.Terminate;
 end;
 
 function THIDM.DeviceName(HidDev: TJvHidDevice): string;
@@ -205,12 +219,15 @@ procedure THIDM.DeviceStart(HidDev: TJvHidDevice);
 begin
   // start reader thread
   HidDev.OnData := HidDeviceData;
+
+  TrayIconMenu.Items.Find(DeviceName(CurrentMapping.Device)).Find(CurrentMapping.Script).Checked := True;
 end;
 
 procedure THIDM.DeviceStop(HidDev: TJvHidDevice);
 begin
-  // sop reader thread
+  // stop reader thread
   HidDev.OnData := nil;
+  TrayIconMenu.Items.Find(DeviceName(CurrentMapping.Device)).Find(CurrentMapping.Script).Checked := False;
 end;
 
 function THIDM.DeviceVendorID(HidDev: TJvHidDevice): string;
@@ -224,36 +241,24 @@ var
 begin
   HidDev:=TJvHidDevice(DevListBox.Items.Objects[DevListBox.ItemIndex]);
   DevVID_PID.Text:= DeviceVendorID(HidDev) + '&' + DeviceProductID(HidDev);
-  bbtActivateScript.Enabled:=(DevListBox.ItemIndex>=0)and(IniScList.ItemIndex>=0)
+  bbtActivateProfile.Enabled := (DevListBox.ItemIndex>=0) and (IniScList.ItemIndex>=0);
 end;
 
 procedure THIDM.FormCreate(Sender: TObject);
 begin
-  a_IniFile:=TMemIniFile.Create(INI_FILE);
-  if not FileExists(INI_FILE) then
+  a_IniFile := TIniFile.Create(ChangeFileExt(Application.ExeName, '.INI'));
+  if not FileExists(ChangeFileExt(Application.ExeName, '.INI')) then
     Application.Terminate;
   a_IniFile.ReadSections(IniScList.Items);
-
-  HMainIcon                := LoadIcon(MainInstance, 'MAINICON');
-
-  Shell_NotifyIcon(NIM_DELETE, @tnid);
-
-  tnid.cbSize              := sizeof(TNotifyIconData);
-  tnid.Wnd                 := handle;
-  tnid.uID                 := 123;
-  tnid.uFlags              := NIF_MESSAGE or NIF_ICON or NIF_TIP;
-  tnid.uCallbackMessage    := WM_NOTIFYICON;
-  tnid.hIcon               := HMainIcon;
-  tnid.szTip               := 'HID Mapper';
-
-  Application.OnMinimize:= MinimizeClick;
 end;
 
 procedure THIDM.HidCtlDeviceChange(Sender: TObject);
 var
   Dev: TJvHidDevice;
-  I, N: Integer;
+  I, N, J: Integer;
   s,s1: String;
+  ProfileItem: TMenuItem;
+  HIDDeviceItem: TMenuItem;
 begin
   s:='';
   s1:='';
@@ -270,20 +275,37 @@ begin
   end;
   DevListBox.ItemIndex:=-1;
   DevListBox.Items.Clear;
+  //Clear Tray Icon menu items
+  while TrayIconMenu.Items[0].Caption <> '-' do
+      TrayIconMenu.Items[0].Free;
 
-  DevVID_PID.Text:='';
+  DevVID_PID.Text := '';
   while HidCtl.CheckOut(Dev) do
   begin
-    N := DevListBox.Items.Add(DeviceName(Dev));
-    Dev.NumInputBuffers := 128;
-    Dev.NumOverlappedBuffers := 128;
-    DevListBox.Items.Objects[N] := Dev;
-    // automatyczne podpiêcie tego samego urz¹dzenia co przed zmian¹
-    s1:=DeviceVendorID(Dev) + '&' + DeviceProductID(Dev);
-    if (s<>'')and(s=s1) then
+    if DevListBox.Items.IndexOf(DeviceName(Dev)) = - 1 then
     begin
-      DevListBox.ItemIndex:=DevListBox.Items.Count-1;
-      DeviceStart(Dev);
+      N := DevListBox.Items.Add(DeviceName(Dev));
+      HIDDeviceItem := TMenuItem.Create(TrayIconMenu);
+      HIDDeviceItem.Caption := DeviceName(Dev);
+      TrayIconMenu.Items.Insert(0, HIDDeviceItem);
+      
+      for J := 0 to  IniScList.Items.Count - 1 do
+      begin
+        ProfileItem := TMenuItem.Create(HIDDeviceItem);
+        ProfileItem.Caption := IniScList.Items[J];
+        ProfileItem.OnClick := ProfileClick;
+        HIDDeviceItem.Add(ProfileItem);
+      end;
+      Dev.NumInputBuffers := 128;
+      Dev.NumOverlappedBuffers := 128;
+      DevListBox.Items.Objects[N] := Dev;
+      // automatyczne podpiêcie tego samego urz¹dzenia co przed zmian¹
+      s1:=DeviceVendorID(Dev) + '&' + DeviceProductID(Dev);
+      if (s<>'')and(s=s1) then
+      begin
+        DevListBox.ItemIndex:=DevListBox.Items.Count-1;
+        DeviceStart(Dev);
+      end;
     end;
   end;
   // jak nie wybrano urz¹dzenia i jest tylko jedno urz¹dzenie to
@@ -298,9 +320,8 @@ end;
 procedure THIDM.HidDeviceData(HidDev: TJvHidDevice;
   ReportID: Byte; const Data: Pointer; Size: Word);
 var
-  i: Integer;
-  v_b: byte;
-  v_Time1, v_Time2: longint;
+  I: Integer;
+  v_b: Byte;
 begin
   
   // topimy wyj¹tek
@@ -332,15 +353,17 @@ end;
 procedure THIDM.IniScListClick(Sender: TObject);
 var
   s: String;
-  i, vMaps: Integer;
+  I: Integer;
+  vMaps: Integer;
 begin
-  bbtActivateScript.Enabled:=(DevListBox.ItemIndex>=0)and(IniScList.ItemIndex>=0);
+
+  bbtActivateProfile.Enabled:=(DevListBox.ItemIndex>=0)and(IniScList.ItemIndex>=0);
   if (IniScList.Items.Count > 0) and (IniScList.ItemIndex >= 0) then
   begin
-    bbtRemoveScript.Enabled:=True;
+    bbtRemoveProfile.Enabled := True;
     with HIDMapping do
     begin
-      bbtEditScript.Enabled:=True;
+      bbtEditProfile.Enabled := True;
       // blokujemy dostêp do tablicy mapowania poprzez wyzerowanie liczby
       // mapowañ
       a_nmaps:=0;
@@ -355,8 +378,8 @@ begin
       SetLength(a_KeyMap,vMaps);
       if vMaps>0 then
       begin
-        for i := 0 to vMaps-1 do
-          AddMappingFromIni(a_IniFile,s,i);
+        for i := 0 to vMaps - 1 do
+          AddMappingFromIni(a_IniFile, s, I);
         MapList.ItemIndex:=0;
         MapListClick(Self);
         a_nmaps:=vMaps;
@@ -375,44 +398,41 @@ begin
   end
   else
   begin
-    bbtRemoveScript.Enabled:=False;
-    bbtEditScript.Enabled:=False;
-    bbtActivateScript.Enabled:=False;
+    bbtRemoveProfile.Enabled := False;
+    bbtEditProfile.Enabled := False;
+    bbtActivateProfile.Enabled := False;
   end;
 end;
 
-procedure THIDM.MinimizeClick(Sender: TObject);
+procedure THIDM.OpenMainWindowClick(Sender: TObject);
 begin
-  Shell_NotifyIcon(NIM_Add, @tnid);
-  Hide;
-  if IsWindowVisible(Application.Handle) then
-    ShowWindow(Application.Handle, SW_HIDE);
-end;
-
-procedure THIDM.RestoreWindow;
-begin
-  Shell_NotifyIcon(NIM_Delete, @tnid);
   Application.Restore;
-  {restore the application}
-  if WindowState = wsMinimized then
-    WindowState := wsNormal;
-  {Reset minimized state}
-  Visible := true;
-  Application.BringToFront;
-  SetForegroundWindow(Application.Handle);
-  {Force form to the foreground }
-  ShowWindowAsync(Handle, SW_SHOW);
 end;
 
-procedure THIDM.SetCurrentMapping;
-var
-  i: Integer;
+procedure THIDM.ProfileClick(Sender: TObject);
 begin
-  if (DevListBox.Items.Count>0)and(DevListBox.ItemIndex>=0) then
-    CurrentMapping.Device:=TJvHidDevice(DevListBox.Items.Objects[DevListBox.ItemIndex]);
-  if (IniScList.Items.Count>0)and(IniScList.ItemIndex>=0) then
-    CurrentMapping.Script:=IniScList.Items[IniScList.ItemIndex];
-  with HidMapping do
+  if Sender is TMenuItem then
+  begin
+    if TMenuItem(Sender).Checked then
+    begin
+      DeactivateProfile;
+      TMenuItem(Sender).Checked := False;
+    end
+    else
+    begin
+      ActivateProfile(TJvHidDevice(DevListBox.Items.Objects[DevListBox.Items.IndexOf(StripHotkey(TMenuItem(Sender).Parent.Caption))]), TMenuItem(Sender).Caption);
+      TMenuItem(Sender).Checked := True;
+    end;
+  end;
+end;
+
+procedure THIDM.SetCurrentMapping(AHIDDevice: TJvHidDevice; AProfile: String);
+var
+  I: Integer;
+begin
+  CurrentMapping.Device := AHIDDevice;
+  CurrentMapping.Script := AProfile;
+  with HIDMapping do
   begin
     CurrentMapping.VID:=a_VID;
     CurrentMapping.PID:=a_PID;
@@ -430,8 +450,7 @@ begin
   end;
 end;
 
-function THIDM.HidCtlEnumerate(HidDev: TJvHidDevice;
-  const Idx: Integer): Boolean;
+function THIDM.HidCtlEnumerate(HidDev: TJvHidDevice; const Idx: Integer): Boolean;
 var
   N: Integer;
   Dev: TJvHidDevice;

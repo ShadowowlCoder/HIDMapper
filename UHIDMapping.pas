@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls, Buttons, ExtCtrls, IniFiles, JvHidControllerClass;
+  Dialogs, StdCtrls, Buttons, ExtCtrls, IniFiles, JvHidControllerClass, Menus;
 
 type
   TKeyMap = record
@@ -55,6 +55,7 @@ type
     eName: TEdit;
     eTest: TMemo;
     eValue: TEdit;
+    procedure eKeysKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure bbtAddClick(Sender: TObject);
     procedure bbtApplyClick(Sender: TObject);
     procedure bbtRemoveClick(Sender: TObject);
@@ -76,7 +77,7 @@ type
     a_PID: String;
     a_nmaps: Integer;
     a_KeyMap: array of TKeyMap;
-    procedure AddMappingFromIni(p_IniFile: TMemIniFile; pName:String; pIndex: Integer);
+    procedure AddMappingFromIni(p_IniFile: TCustomIniFile; pName:String; pIndex: Integer);
     procedure SetMappingFromGUI(pIndex: Integer);
     procedure SendKeys(Keys: String);
     procedure SetGuessDevice(p_GuessDevice: TJvHidDevice);
@@ -123,7 +124,7 @@ implementation
 
 { THIDMapping }
 
-procedure THIDMapping.AddMappingFromIni(p_IniFile: TMemIniFile; pName: String; pIndex: Integer);
+procedure THIDMapping.AddMappingFromIni(p_IniFile: TCustomIniFile; pName: String; pIndex: Integer);
 var
   s1, s2: String;
 begin
@@ -267,6 +268,18 @@ begin
     end;
 end;
 
+procedure THIDMapping.eKeysKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  I: Integer;
+begin
+  I := -1;
+  repeat
+    I := I + 1;
+  until (I = Length(CODE_TABLE)) or (CODE_TABLE[I].Code = Key);
+  if I <> Length(CODE_TABLE) then
+    eKeys.Text := eKeys.Text + CODE_TABLE[I].name;
+end;
+
 procedure THIDMapping.eNameChange(Sender: TObject);
 begin
   bbtAdd.Enabled:=(eName.Text<>'');
@@ -274,7 +287,7 @@ end;
 
 procedure THIDMapping.FormCreate(Sender: TObject);
 begin
-  a_GuessInProgress:=False;
+  a_GuessInProgress := False;
 end;
 
 procedure THIDMapping.HidDeviceDataGuess(HidDev: TJvHidDevice; ReportID: Byte;

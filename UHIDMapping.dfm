@@ -297,6 +297,7 @@ object HIDMapping: THIDMapping
       ParentShowHint = False
       ShowHint = True
       TabOrder = 9
+      OnKeyUp = eKeysKeyUp
     end
     object eMask: TEdit
       Left = 127
