@@ -117,7 +117,7 @@ procedure THIDM.bbtAddProfileClick(Sender: TObject);
 begin
   // Add new Profile
   AddProfile.eProfileName.Text := EmptyStr;
-  if AddProfile.ShowModal = mrOK then
+  if (AddProfile.ShowModal = mrOK) and (AddProfile.eProfileName.Text <> EmptyStr) then
   begin
     IniScList.Items.Add(AddProfile.eProfileName.Text);
     a_IniFile.WriteInteger(AddProfile.eProfileName.Text, 'nmaps', 0);

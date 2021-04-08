@@ -248,9 +248,9 @@ object HIDM: THIDM
     object lbActiveScripts: TLabel
       Left = 3
       Top = 3
-      Width = 77
+      Width = 72
       Height = 13
-      Caption = 'Active Profiless:'
+      Caption = 'Active Profiles:'
     end
     object ActiveScriptsList: TListBox
       Left = 0
