@@ -1,11 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
-  <Transactions>
+	<Transactions>
     <Transaction>2021.04.07 21:32:15.013.pas,E:\Projects\HIDMapper-main\Unit1.pas=E:\Projects\HIDMapper-main\AddScript.pas</Transaction>
     <Transaction>2021.04.07 21:32:15.013.dfm,E:\Projects\HIDMapper-main\Unit1.dfm=E:\Projects\HIDMapper-main\AddScript.dfm</Transaction>
     <Transaction>2021.04.07 21:39:46.052.pas,E:\Projects\HIDMapper-main\AddScript.pas=E:\Projects\HIDMapper-main\UAddScript.pas</Transaction>
     <Transaction>2021.04.07 21:39:46.052.dfm,E:\Projects\HIDMapper-main\AddScript.dfm=E:\Projects\HIDMapper-main\UAddScript.dfm</Transaction>
     <Transaction>2021.04.07 23:00:20.546.pas,E:\Projects\HIDMapper-main\UAddScript.pas=E:\Projects\HIDMapper-main\UAddProfile.pas</Transaction>
     <Transaction>2021.04.07 23:00:20.546.dfm,E:\Projects\HIDMapper-main\UAddScript.dfm=E:\Projects\HIDMapper-main\UAddProfile.dfm</Transaction>
+    <Transaction>2021.04.08 06:21:38.544.pas,E:\Projects\HIDMapper-main\Unit1.pas=E:\Projects\HIDMapper-main\UCaptureKey.pas</Transaction>
+    <Transaction>2021.04.08 06:21:38.544.dfm,E:\Projects\HIDMapper-main\Unit1.dfm=E:\Projects\HIDMapper-main\UCaptureKey.dfm</Transaction>
+    <Transaction>2021.04.08 20:26:40.380.pas,E:\Projects\HIDMapper-main\UCaptureKey.pas=</Transaction>
+    <Transaction>2021.04.08 20:26:40.380.dfm,E:\Projects\HIDMapper-main\UCaptureKey.dfm=</Transaction>
   </Transactions>
 </BorlandProject>

@@ -2,8 +2,8 @@ object HIDMapping: THIDMapping
   Left = 0
   Top = 0
   Caption = 'HID Mappings Editor'
-  ClientHeight = 541
-  ClientWidth = 508
+  ClientHeight = 599
+  ClientWidth = 518
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -17,7 +17,7 @@ object HIDMapping: THIDMapping
   object Splitter3: TSplitter
     Left = 0
     Top = 228
-    Width = 508
+    Width = 518
     Height = 3
     Cursor = crVSplit
     Align = alTop
@@ -29,7 +29,7 @@ object HIDMapping: THIDMapping
   object pnMapList: TPanel
     Left = 0
     Top = 0
-    Width = 508
+    Width = 518
     Height = 228
     Align = alTop
     BevelOuter = bvNone
@@ -37,7 +37,7 @@ object HIDMapping: THIDMapping
     Constraints.MinHeight = 70
     TabOrder = 0
     DesignSize = (
-      508
+      518
       228)
     object lbMapList: TLabel
       Left = 5
@@ -50,7 +50,7 @@ object HIDMapping: THIDMapping
     object MapList: TListBox
       Left = 2
       Top = 17
-      Width = 506
+      Width = 516
       Height = 210
       Anchors = [akLeft, akTop, akRight, akBottom]
       ItemHeight = 13
@@ -61,18 +61,18 @@ object HIDMapping: THIDMapping
   object pnKey: TPanel
     Left = 0
     Top = 231
-    Width = 508
-    Height = 310
+    Width = 518
+    Height = 368
     Align = alClient
     BevelOuter = bvNone
     Constraints.MinHeight = 166
     TabOrder = 1
     DesignSize = (
-      508
-      310)
+      518
+      368)
     object lbTests: TLabel
       Left = 3
-      Top = 100
+      Top = 102
       Width = 30
       Height = 13
       Caption = 'Tests:'
@@ -88,9 +88,9 @@ object HIDMapping: THIDMapping
     object lKeys: TLabel
       Left = 3
       Top = 73
-      Width = 27
+      Width = 22
       Height = 13
-      Caption = 'K&eys:'
+      Caption = 'K&ey:'
       FocusControl = eKeys
     end
     object lMask: TLabel
@@ -252,7 +252,7 @@ object HIDMapping: THIDMapping
     end
     object btTest: TButton
       Left = 50
-      Top = 94
+      Top = 97
       Width = 75
       Height = 25
       Caption = 'Test keys'
@@ -290,14 +290,16 @@ object HIDMapping: THIDMapping
     object eKeys: TEdit
       Left = 50
       Top = 70
-      Width = 458
+      Width = 468
       Height = 21
       Hint = 'Key sequence'
       Anchors = [akLeft, akTop, akRight]
+      Color = clMenu
       ParentShowHint = False
+      ReadOnly = True
       ShowHint = True
       TabOrder = 9
-      OnKeyUp = eKeysKeyUp
+      OnKeyDown = eKeysKeyDown
     end
     object eMask: TEdit
       Left = 127
@@ -313,7 +315,7 @@ object HIDMapping: THIDMapping
     object eName: TEdit
       Left = 50
       Top = 26
-      Width = 458
+      Width = 468
       Height = 21
       Hint = 'Name of key mapping'
       Anchors = [akLeft, akTop, akRight]
@@ -324,9 +326,9 @@ object HIDMapping: THIDMapping
     end
     object eTest: TMemo
       Left = 3
-      Top = 122
-      Width = 506
-      Height = 186
+      Top = 128
+      Width = 516
+      Height = 238
       Hint = 'Test field for mappings'
       Anchors = [akLeft, akTop, akRight, akBottom]
       ParentShowHint = False
@@ -344,5 +346,9 @@ object HIDMapping: THIDMapping
       ShowHint = True
       TabOrder = 8
     end
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 424
+    Top = 80
   end
 end

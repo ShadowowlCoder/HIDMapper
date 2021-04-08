@@ -116,11 +116,11 @@ end;
 procedure THIDM.bbtAddProfileClick(Sender: TObject);
 begin
   // Add new Profile
-  AddProfile.eProfileName.Text := EmptyStr;
-  if (AddProfile.ShowModal = mrOK) and (AddProfile.eProfileName.Text <> EmptyStr) then
+  AddProfile.edProfileName.Text := EmptyStr;
+  if (AddProfile.ShowModal = mrOK) and (AddProfile.edProfileName.Text <> EmptyStr) then
   begin
-    IniScList.Items.Add(AddProfile.eProfileName.Text);
-    a_IniFile.WriteInteger(AddProfile.eProfileName.Text, 'nmaps', 0);
+    IniScList.Items.Add(AddProfile.edProfileName.Text);
+    a_IniFile.WriteInteger(AddProfile.edProfileName.Text, 'nmaps', 0);
   end;
 end;
 

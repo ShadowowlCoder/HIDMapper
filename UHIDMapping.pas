@@ -55,7 +55,8 @@ type
     eName: TEdit;
     eTest: TMemo;
     eValue: TEdit;
-    procedure eKeysKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    PopupMenu1: TPopupMenu;
+    procedure eKeysKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure bbtAddClick(Sender: TObject);
     procedure bbtApplyClick(Sender: TObject);
     procedure bbtRemoveClick(Sender: TObject);
@@ -268,21 +269,16 @@ begin
     end;
 end;
 
-procedure THIDMapping.eKeysKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  I: Integer;
+procedure THIDMapping.eKeysKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  I := -1;
-  repeat
-    I := I + 1;
-  until (I = Length(CODE_TABLE)) or (CODE_TABLE[I].Code = Key);
-  if I <> Length(CODE_TABLE) then
-    eKeys.Text := eKeys.Text + CODE_TABLE[I].name;
+  //Removing unnecessary clicks Ctrl, Alt, Shift
+  if Key in [16, 17, 18] then Key := 0;
+  eKeys.Text := ShortCutToText(ShortCut(Key, Shift));
 end;
 
 procedure THIDMapping.eNameChange(Sender: TObject);
 begin
-  bbtAdd.Enabled:=(eName.Text<>'');
+  bbtAdd.Enabled := (eName.Text <> '');
 end;
 
 procedure THIDMapping.FormCreate(Sender: TObject);
@@ -294,7 +290,7 @@ procedure THIDMapping.HidDeviceDataGuess(HidDev: TJvHidDevice; ReportID: Byte;
   const Data: Pointer; Size: Word);
 var
   s,s1,s2: String;
-  i: Integer;
+  I: Integer;
   v_b: byte;
 begin
   // topimy wyj¹tek
@@ -355,38 +351,83 @@ end;
 
 procedure THIDMapping.SendKeys(Keys: String);
 var
-  i: Integer;
-  w: word;
-  s: String;
-  b: Boolean;
+  Input: TInput;
+  KeyboarInput: TKeybdInput;
+  ShortCut: TShortCut;
+  Shift: TShiftState;
+  Key: Word;
 begin
-  if (Length(Keys)>0) then
+  ShortCut := TextToShortCut(Keys);
+  ShortCutToKey(ShortCut, Key, Shift);
+
+  //ssShift press
+  if ssShift in Shift then
   begin
-    s:=Keys;
-    while Length(s)>0 do
-    begin
-      b:=False;
-      for i := 1 to Length(CODE_TABLE) do
-        if (not b)and(CODE_TABLE[i].name=copy(s,1,Length(CODE_TABLE[i].name))) then
-        begin
-          keybd_event(CODE_TABLE[i].code,0,0,0);
-          keybd_event(CODE_TABLE[i].code,0,KEYEVENTF_KEYUP,0);
-          s:=Copy(s,length(CODE_TABLE[i].name)+1,Length(s));
-          b:=True;
-        end;
-      if not b then
-      begin
-        w:=VkKeyScan(s[1]);
-        if Hi(w) and 1>0 then keybd_event(VK_SHIFT,0,0,0);
-        if Hi(w) and 2>0 then keybd_event(VK_CONTROL,0,0,0);
-        keybd_event(Lo(w),Hi(w),0,0);
-        keybd_event(Lo(w),Hi(w),KEYEVENTF_KEYUP,0);
-        if Hi(w) and 2>0 then keybd_event(VK_CONTROL,0,KEYEVENTF_KEYUP,0);
-        if Hi(w) and 1>0 then keybd_event(VK_SHIFT,0,KEYEVENTF_KEYUP,0);
-        s:=Copy(s,2,length(s)-1);
-      end;
-    end;
+    KeyboarInput.wVk := 16;
+    KeyboarInput.dwFlags := 0;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
   end;
+
+  Input.Itype := INPUT_KEYBOARD;
+  //Ctrl press
+
+  if ssCtrl in Shift then
+  begin
+    KeyboarInput.wVk := 17;
+    KeyboarInput.dwFlags := 0;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
+  end;
+
+  //ssAlt press
+  if ssAlt in Shift then
+  begin
+    KeyboarInput.wVk := 18;
+    KeyboarInput.dwFlags := 0;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
+  end;
+
+  //Press key
+  KeyboarInput.wVk := Key;
+  KeyboarInput.dwFlags := 0;
+  Input.ki := KeyboarInput;
+  SendInput(1, Input, SizeOf(Input));
+
+  //Key up
+  KeyboarInput.dwFlags := KEYEVENTF_KEYUP;
+  Input.ki := KeyboarInput;
+  SendInput(1, Input, SizeOf(Input));
+
+  //ssAlt up
+  if ssAlt in Shift then
+  begin
+    KeyboarInput.wVk := 18;
+    KeyboarInput.dwFlags := KEYEVENTF_KEYUP;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
+  end;
+
+  Input.Itype := INPUT_KEYBOARD;
+  //Ctrl up
+  if ssCtrl in Shift then
+  begin
+    KeyboarInput.wVk := 17;
+    KeyboarInput.dwFlags := KEYEVENTF_KEYUP;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
+  end;
+
+  //ssShift up
+  if ssShift in Shift then
+  begin
+    KeyboarInput.wVk := 16;
+    KeyboarInput.dwFlags := KEYEVENTF_KEYUP;
+    Input.ki := KeyboarInput;
+    SendInput(1, Input, SizeOf(Input));
+  end;
+
 end;
 
 procedure THIDMapping.SetGuessDevice(p_GuessDevice: TJvHidDevice);

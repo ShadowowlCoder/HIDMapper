@@ -3,8 +3,8 @@ object AddProfile: TAddProfile
   Top = 0
   BorderStyle = bsDialog
   Caption = 'Add Profile'
-  ClientHeight = 85
-  ClientWidth = 395
+  ClientHeight = 87
+  ClientWidth = 387
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,8 +14,8 @@ object AddProfile: TAddProfile
   OldCreateOrder = False
   Position = poMainFormCenter
   DesignSize = (
-    395
-    85)
+    387
+    87)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
@@ -25,34 +25,42 @@ object AddProfile: TAddProfile
     Height = 13
     Caption = 'Profile name'
   end
-  object eProfileName: TEdit
+  object edProfileName: TEdit
     Left = 8
     Top = 24
-    Width = 379
+    Width = 371
     Height = 21
     Hint = 'Name of key mapping'
     Anchors = [akLeft, akTop, akRight]
     ParentShowHint = False
     ShowHint = True
     TabOrder = 0
-    ExplicitWidth = 369
+    ExplicitWidth = 379
   end
-  object bOk: TButton
-    Left = 231
-    Top = 51
+  object btOk: TButton
+    Left = 223
+    Top = 53
     Width = 75
     Height = 25
+    Anchors = [akRight, akBottom]
     Caption = 'Ok'
+    Default = True
     ModalResult = 1
     TabOrder = 1
+    ExplicitLeft = 231
+    ExplicitTop = 51
   end
-  object bCancel: TButton
-    Left = 312
-    Top = 51
+  object btCancel: TButton
+    Left = 304
+    Top = 53
     Width = 75
     Height = 25
+    Anchors = [akRight, akBottom]
+    Cancel = True
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 2
+    ExplicitLeft = 312
+    ExplicitTop = 51
   end
 end

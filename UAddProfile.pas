@@ -8,10 +8,10 @@ uses
 
 type
   TAddProfile = class(TForm)
-    eProfileName: TEdit;
+    edProfileName: TEdit;
     Label1: TLabel;
-    bOk: TButton;
-    bCancel: TButton;
+    btOk: TButton;
+    btCancel: TButton;
   private
     { Private declarations }
   public
